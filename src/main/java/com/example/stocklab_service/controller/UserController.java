@@ -1,10 +1,14 @@
 package com.example.stocklab_service.controller;
 
-import com.example.stocklab_service.entity.User;
-import com.example.stocklab_service.repository.mapper.UserMapper;
+import com.example.stocklab_service.domain.dto.UserCreateDTO;
+import com.example.stocklab_service.domain.dto.UserUpdateDTO;
+import com.example.stocklab_service.domain.dto.UserStatusUpdateDTO;
+import com.example.stocklab_service.domain.vo.UserVO;
+import com.example.stocklab_service.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,21 +21,21 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @GetMapping
     @Operation(summary = "获取所有用户", description = "获取系统中所有用户列表")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userMapper.selectAll();
+    public ResponseEntity<List<UserVO>> getAllUsers() {
+        List<UserVO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取用户", description = "根据用户ID获取用户详细信息")
-    public ResponseEntity<User> getUserById(
+    public ResponseEntity<UserVO> getUserById(
             @Parameter(description = "用户ID", required = true)
             @PathVariable Long id) {
-        User user = userMapper.selectById(id);
+        UserVO user = userService.getUserById(id);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -41,10 +45,10 @@ public class UserController {
 
     @GetMapping("/username/{username}")
     @Operation(summary = "根据用户名获取用户", description = "根据用户名获取用户详细信息")
-    public ResponseEntity<User> getUserByUsername(
+    public ResponseEntity<UserVO> getUserByUsername(
             @Parameter(description = "用户名", required = true)
             @PathVariable String username) {
-        User user = userMapper.selectByUsername(username);
+        UserVO user = userService.getUserByUsername(username);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -54,42 +58,37 @@ public class UserController {
 
     @GetMapping("/role/{role}")
     @Operation(summary = "根据角色获取用户", description = "根据用户角色获取用户列表")
-    public ResponseEntity<List<User>> getUsersByRole(
+    public ResponseEntity<List<UserVO>> getUsersByRole(
             @Parameter(description = "用户角色", required = true)
             @PathVariable String role) {
-        List<User> users = userMapper.selectByRole(role);
+        List<UserVO> users = userService.getUsersByRole(role);
         return ResponseEntity.ok(users);
     }
 
     @PostMapping
     @Operation(summary = "创建用户", description = "创建新用户")
-    public ResponseEntity<User> createUser(
+    public ResponseEntity<UserVO> createUser(
             @Parameter(description = "用户信息", required = true)
-            @RequestBody User user) {
+            @Valid @RequestBody UserCreateDTO userCreateDTO) {
         try {
-            int result = userMapper.insert(user);
-            if (result > 0) {
-                return ResponseEntity.ok(user);
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
-        } catch (Exception e) {
+            UserVO user = userService.createUser(userCreateDTO);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "更新用户", description = "根据ID更新用户信息")
-    public ResponseEntity<User> updateUser(
+    public ResponseEntity<UserVO> updateUser(
             @Parameter(description = "用户ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "用户信息", required = true)
-            @RequestBody User user) {
-        user.setId(id);
-        int result = userMapper.updateById(user);
-        if (result > 0) {
+            @Valid @RequestBody UserUpdateDTO userUpdateDTO) {
+        try {
+            UserVO user = userService.updateUser(id, userUpdateDTO);
             return ResponseEntity.ok(user);
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -100,11 +99,11 @@ public class UserController {
             @Parameter(description = "用户ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "激活状态", required = true)
-            @RequestParam Boolean isActive) {
-        int result = userMapper.updateIsActive(id, isActive);
-        if (result > 0) {
+            @Valid @RequestBody UserStatusUpdateDTO statusUpdateDTO) {
+        try {
+            userService.updateUserStatus(id, statusUpdateDTO);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -114,10 +113,10 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(
             @Parameter(description = "用户ID", required = true)
             @PathVariable Long id) {
-        int result = userMapper.deleteById(id);
-        if (result > 0) {
+        try {
+            userService.deleteUser(id);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -125,7 +124,7 @@ public class UserController {
     @GetMapping("/count")
     @Operation(summary = "获取用户总数", description = "获取系统中用户总数")
     public ResponseEntity<Integer> getUserCount() {
-        int count = userMapper.count();
+        int count = userService.getUserCount();
         return ResponseEntity.ok(count);
     }
 }

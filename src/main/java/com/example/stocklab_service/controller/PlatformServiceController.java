@@ -1,10 +1,13 @@
 package com.example.stocklab_service.controller;
 
-import com.example.stocklab_service.entity.PlatformService;
-import com.example.stocklab_service.repository.mapper.PlatformServiceMapper;
+import com.example.stocklab_service.domain.dto.PlatformServiceCreateDTO;
+import com.example.stocklab_service.domain.dto.PlatformServiceUpdateDTO;
+import com.example.stocklab_service.domain.vo.PlatformServiceVO;
+import com.example.stocklab_service.service.PlatformServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,28 +20,28 @@ import java.util.List;
 public class PlatformServiceController {
 
     @Autowired
-    private PlatformServiceMapper platformServiceMapper;
+    private PlatformServiceService platformServiceService;
 
     @GetMapping
     @Operation(summary = "获取所有平台服务", description = "获取系统中所有平台服务列表")
-    public ResponseEntity<List<PlatformService>> getAllServices() {
-        List<PlatformService> services = platformServiceMapper.selectAll();
+    public ResponseEntity<List<PlatformServiceVO>> getAllServices() {
+        List<PlatformServiceVO> services = platformServiceService.getAllServices();
         return ResponseEntity.ok(services);
     }
 
     @GetMapping("/visible")
     @Operation(summary = "获取可见平台服务", description = "获取所有可见的平台服务，按排序权重排序")
-    public ResponseEntity<List<PlatformService>> getVisibleServices() {
-        List<PlatformService> services = platformServiceMapper.selectVisibleOrderBySortOrder();
+    public ResponseEntity<List<PlatformServiceVO>> getVisibleServices() {
+        List<PlatformServiceVO> services = platformServiceService.getVisibleServices();
         return ResponseEntity.ok(services);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "根据ID获取平台服务", description = "根据服务ID获取平台服务详细信息")
-    public ResponseEntity<PlatformService> getServiceById(
+    public ResponseEntity<PlatformServiceVO> getServiceById(
             @Parameter(description = "服务ID", required = true)
             @PathVariable Long id) {
-        PlatformService service = platformServiceMapper.selectById(id);
+        PlatformServiceVO service = platformServiceService.getServiceById(id);
         if (service != null) {
             return ResponseEntity.ok(service);
         } else {
@@ -48,10 +51,10 @@ public class PlatformServiceController {
 
     @GetMapping("/code/{serviceCode}")
     @Operation(summary = "根据服务代码获取平台服务", description = "根据服务代码获取平台服务详细信息")
-    public ResponseEntity<PlatformService> getServiceByCode(
+    public ResponseEntity<PlatformServiceVO> getServiceByCode(
             @Parameter(description = "服务代码", required = true)
             @PathVariable String serviceCode) {
-        PlatformService service = platformServiceMapper.selectByServiceCode(serviceCode);
+        PlatformServiceVO service = platformServiceService.getServiceByCode(serviceCode);
         if (service != null) {
             return ResponseEntity.ok(service);
         } else {
@@ -61,51 +64,46 @@ public class PlatformServiceController {
 
     @GetMapping("/type/{serviceType}")
     @Operation(summary = "根据服务类型获取平台服务", description = "根据服务类型获取平台服务列表")
-    public ResponseEntity<List<PlatformService>> getServicesByType(
+    public ResponseEntity<List<PlatformServiceVO>> getServicesByType(
             @Parameter(description = "服务类型（platform/service/agent）", required = true)
             @PathVariable String serviceType) {
-        List<PlatformService> services = platformServiceMapper.selectByServiceType(serviceType);
+        List<PlatformServiceVO> services = platformServiceService.getServicesByType(serviceType);
         return ResponseEntity.ok(services);
     }
 
     @GetMapping("/type/{serviceType}/visible")
     @Operation(summary = "根据服务类型获取可见平台服务", description = "根据服务类型获取可见的平台服务，按排序权重排序")
-    public ResponseEntity<List<PlatformService>> getVisibleServicesByType(
+    public ResponseEntity<List<PlatformServiceVO>> getVisibleServicesByType(
             @Parameter(description = "服务类型（platform/service/agent）", required = true)
             @PathVariable String serviceType) {
-        List<PlatformService> services = platformServiceMapper.selectVisibleByServiceTypeOrderBySortOrder(serviceType);
+        List<PlatformServiceVO> services = platformServiceService.getVisibleServicesByType(serviceType);
         return ResponseEntity.ok(services);
     }
 
     @PostMapping
     @Operation(summary = "创建平台服务", description = "创建新的平台服务")
-    public ResponseEntity<PlatformService> createService(
+    public ResponseEntity<PlatformServiceVO> createService(
             @Parameter(description = "平台服务信息", required = true)
-            @RequestBody PlatformService service) {
+            @Valid @RequestBody PlatformServiceCreateDTO createDTO) {
         try {
-            int result = platformServiceMapper.insert(service);
-            if (result > 0) {
-                return ResponseEntity.ok(service);
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
-        } catch (Exception e) {
+            PlatformServiceVO service = platformServiceService.createService(createDTO);
+            return ResponseEntity.ok(service);
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "更新平台服务", description = "根据ID更新平台服务信息")
-    public ResponseEntity<PlatformService> updateService(
+    public ResponseEntity<PlatformServiceVO> updateService(
             @Parameter(description = "服务ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "平台服务信息", required = true)
-            @RequestBody PlatformService service) {
-        service.setId(id);
-        int result = platformServiceMapper.updateById(service);
-        if (result > 0) {
+            @Valid @RequestBody PlatformServiceUpdateDTO updateDTO) {
+        try {
+            PlatformServiceVO service = platformServiceService.updateService(id, updateDTO);
             return ResponseEntity.ok(service);
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -117,10 +115,10 @@ public class PlatformServiceController {
             @PathVariable Long id,
             @Parameter(description = "可见状态", required = true)
             @RequestParam Boolean isVisible) {
-        int result = platformServiceMapper.updateIsVisible(id, isVisible);
-        if (result > 0) {
+        try {
+            platformServiceService.updateServiceVisibility(id, isVisible);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -132,10 +130,10 @@ public class PlatformServiceController {
             @PathVariable Long id,
             @Parameter(description = "排序权重", required = true)
             @RequestParam Integer sortOrder) {
-        int result = platformServiceMapper.updateSortOrder(id, sortOrder);
-        if (result > 0) {
+        try {
+            platformServiceService.updateSortOrder(id, sortOrder);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -145,10 +143,10 @@ public class PlatformServiceController {
     public ResponseEntity<Void> deleteService(
             @Parameter(description = "服务ID", required = true)
             @PathVariable Long id) {
-        int result = platformServiceMapper.deleteById(id);
-        if (result > 0) {
+        try {
+            platformServiceService.deleteService(id);
             return ResponseEntity.ok().build();
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -156,7 +154,7 @@ public class PlatformServiceController {
     @GetMapping("/count")
     @Operation(summary = "获取服务总数", description = "获取系统中平台服务总数")
     public ResponseEntity<Integer> getServiceCount() {
-        int count = platformServiceMapper.count();
+        int count = platformServiceService.getServiceCount();
         return ResponseEntity.ok(count);
     }
 
@@ -165,7 +163,7 @@ public class PlatformServiceController {
     public ResponseEntity<Integer> getServiceCountByType(
             @Parameter(description = "服务类型", required = true)
             @PathVariable String serviceType) {
-        int count = platformServiceMapper.countByServiceType(serviceType);
+        int count = platformServiceService.getServiceCountByType(serviceType);
         return ResponseEntity.ok(count);
     }
 }
