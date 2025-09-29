@@ -4,7 +4,13 @@
       "mcp__filesystem__list_directory",
       "mcp__filesystem__read_text_file",
       "mcp__filesystem__directory_tree",
-      "Bash(./mvnw:*)"
+      "Bash(./mvnw:*)",
+      "mcp__filesystem__create_directory",
+      "mcp__filesystem__write_file",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd.exe /c \"taskkill /F /PID 39376\")"
     ],
     "deny": [],
     "ask": []
