@@ -10,7 +10,7 @@ import java.util.List;
 public interface PlatformServiceMapper {
     
     /**
-     * 根据ID查询平台服务
+     * 根据ID查询平台服务 
      */
     PlatformService selectById(@Param("id") Long id);
     
