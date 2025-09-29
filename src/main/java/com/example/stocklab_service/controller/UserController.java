@@ -78,13 +78,18 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     @Operation(summary = "更新用户", description = "根据ID更新用户信息")
     public ResponseEntity<UserVO> updateUser(
             @Parameter(description = "用户ID", required = true)
             @PathVariable Long id,
+            @Parameter(description = "操作类型", required = true)
+            @RequestParam String _method,
             @Parameter(description = "用户信息", required = true)
             @Valid @RequestBody UserUpdateDTO userUpdateDTO) {
+        if (!"update".equals(_method)) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             UserVO user = userService.updateUser(id, userUpdateDTO);
             return ResponseEntity.ok(user);
@@ -93,13 +98,18 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{id}/status")
+    @PostMapping("/{id}/status")
     @Operation(summary = "更新用户状态", description = "更新用户的激活状态")
     public ResponseEntity<Void> updateUserStatus(
             @Parameter(description = "用户ID", required = true)
             @PathVariable Long id,
+            @Parameter(description = "操作类型", required = true)
+            @RequestParam String _method,
             @Parameter(description = "激活状态", required = true)
             @Valid @RequestBody UserStatusUpdateDTO statusUpdateDTO) {
+        if (!"updateStatus".equals(_method)) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             userService.updateUserStatus(id, statusUpdateDTO);
             return ResponseEntity.ok().build();
@@ -108,11 +118,16 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}/delete")
     @Operation(summary = "删除用户", description = "根据ID删除用户")
     public ResponseEntity<Void> deleteUser(
             @Parameter(description = "用户ID", required = true)
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @Parameter(description = "操作类型", required = true)
+            @RequestParam String _method) {
+        if (!"delete".equals(_method)) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok().build();

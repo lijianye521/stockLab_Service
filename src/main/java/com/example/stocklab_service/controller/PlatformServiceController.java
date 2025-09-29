@@ -93,13 +93,18 @@ public class PlatformServiceController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     @Operation(summary = "更新平台服务", description = "根据ID更新平台服务信息")
     public ResponseEntity<PlatformServiceVO> updateService(
             @Parameter(description = "服务ID", required = true)
             @PathVariable Long id,
+            @Parameter(description = "操作类型", required = true)
+            @RequestParam String _method,
             @Parameter(description = "平台服务信息", required = true)
             @Valid @RequestBody PlatformServiceUpdateDTO updateDTO) {
+        if (!"update".equals(_method)) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             PlatformServiceVO service = platformServiceService.updateService(id, updateDTO);
             return ResponseEntity.ok(service);
@@ -108,13 +113,18 @@ public class PlatformServiceController {
         }
     }
 
-    @PutMapping("/{id}/visibility")
+    @PostMapping("/{id}/visibility")
     @Operation(summary = "更新服务可见性", description = "更新平台服务的可见状态")
     public ResponseEntity<Void> updateServiceVisibility(
             @Parameter(description = "服务ID", required = true)
             @PathVariable Long id,
+            @Parameter(description = "操作类型", required = true)
+            @RequestParam String _method,
             @Parameter(description = "可见状态", required = true)
             @RequestParam Boolean isVisible) {
+        if (!"updateVisibility".equals(_method)) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             platformServiceService.updateServiceVisibility(id, isVisible);
             return ResponseEntity.ok().build();
@@ -123,13 +133,18 @@ public class PlatformServiceController {
         }
     }
 
-    @PutMapping("/{id}/sort-order")
+    @PostMapping("/{id}/sort-order")
     @Operation(summary = "更新排序权重", description = "更新平台服务的排序权重")
     public ResponseEntity<Void> updateSortOrder(
             @Parameter(description = "服务ID", required = true)
             @PathVariable Long id,
+            @Parameter(description = "操作类型", required = true)
+            @RequestParam String _method,
             @Parameter(description = "排序权重", required = true)
             @RequestParam Integer sortOrder) {
+        if (!"updateSortOrder".equals(_method)) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             platformServiceService.updateSortOrder(id, sortOrder);
             return ResponseEntity.ok().build();
@@ -138,11 +153,16 @@ public class PlatformServiceController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}/delete")
     @Operation(summary = "删除平台服务", description = "根据ID删除平台服务")
     public ResponseEntity<Void> deleteService(
             @Parameter(description = "服务ID", required = true)
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @Parameter(description = "操作类型", required = true)
+            @RequestParam String _method) {
+        if (!"delete".equals(_method)) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             platformServiceService.deleteService(id);
             return ResponseEntity.ok().build();
