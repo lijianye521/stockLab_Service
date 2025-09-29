@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.stocklab_service.repository.mapper.UserMapper">
+
+<!-- 结果映射 --> <resultMap id="UserResultMap" type="com.example.stocklab_service.entity.User">
+    <id property="id" column="id"/>
+    <result property="username" column="username"/>
+    <result property="password" column="password"/>
+    <result property="nickname" column="nickname"/>
+    <result property="email" column="email"/>
+    <result property="role" column="role"/>
+    <result property="isActive" column="is_active"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="updatedAt" column="updated_at"/>
+</resultMap>
+
+<!-- 基础字段 -->
+<sql id="Base_Column_List">
+    id, username, password, nickname, email, role, is_active, created_at, updated_at
+</sql>
+
+<!-- 根据ID查询用户 -->
+<select id="selectById" resultMap="UserResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM users
+                            WHERE id = #{id} </select>
+
+<!-- 根据用户名查询用户 -->
+<select id="selectByUsername" resultMap="UserResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM users
+                            WHERE username = #{username} </select>
+
+<!-- 查询所有用户 -->
+<select id="selectAll" resultMap="UserResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM users
+                            ORDER BY created_at DESC
+</select>
+
+<!-- 根据活跃状态查询用户 -->
+<select id="selectByIsActive" resultMap="UserResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM users
+                            WHERE is_active = #{isActive}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 根据角色查询用户 -->
+<select id="selectByRole" resultMap="UserResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM users
+                            WHERE role = #{role}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 插入用户 -->
+<insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO users (username, password, nickname, email, role, is_active)
+                            VALUES (#{username}, #{password}, #{nickname}, #{email}, #{role}, #{isActive})
+</insert>
+
+<!-- 更新用户信息 -->
+<update id="updateById">
+    UPDATE users
+                            SET username = #{username},
+            nickname = #{nickname},
+            email = #{email},
+            role = #{role},
+            is_active = #{isActive}
+    WHERE id = #{id} </update>
+
+<!-- 更新用户密码 -->
+<update id="updatePassword">
+    UPDATE users
+                            SET password = #{password}
+    WHERE id = #{id} </update>
+
+<!-- 更新用户活跃状态 -->
+<update id="updateIsActive">
+    UPDATE users
+                            SET is_active = #{isActive}
+    WHERE id = #{id} </update>
+
+<!-- 根据ID删除用户 -->
+<delete id="deleteById">
+    DELETE FROM users
+                            WHERE id = #{id} </delete>
+
+<!-- 统计用户总数 -->
+<select id="count" resultType="int">
+    SELECT COUNT(*)
+                            FROM users
+</select>
+
+<!-- 根据用户名统计 -->
+<select id="countByUsername" resultType="int">
+    SELECT COUNT(*)
+                            FROM users
+                            WHERE username = #{username} </select></mapper>

@@ -1,7 +1,7 @@
 package com.example.stocklab_service.controller;
 
 import com.example.stocklab_service.entity.PlatformService;
-import com.example.stocklab_service.mapper.PlatformServiceMapper;
+import com.example.stocklab_service.repository.mapper.PlatformServiceMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.example.stocklab_service.mapper")
+@MapperScan("com.example.stocklab_service.repository.mapper")
 public class StockLabServiceApplication {
 
     public static void main(String[] args) {

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.stocklab_service.repository.mapper.UserOperationLogMapper">
+
+<!-- 结果映射 --> <resultMap id="UserOperationLogResultMap" type="com.example.stocklab_service.entity.UserOperationLog">
+    <id property="id" column="id"/>
+    <result property="userId" column="user_id"/>
+    <result property="operationType" column="operation_type"/>
+    <result property="serviceCode" column="service_code"/>
+    <result property="operationDetail" column="operation_detail"/>
+    <result property="ipAddress" column="ip_address"/>
+    <result property="userAgent" column="user_agent"/>
+    <result property="createdAt" column="created_at"/>
+</resultMap>
+
+<!-- 基础字段 -->
+<sql id="Base_Column_List">
+    id, user_id, operation_type, service_code, operation_detail, ip_address, user_agent, created_at
+</sql>
+
+<!-- 根据ID查询操作日志 -->
+<select id="selectById" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE id = #{id} </select>
+
+<!-- 查询所有操作日志 -->
+<select id="selectAll" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                ORDER BY created_at DESC
+</select>
+
+<!-- 根据用户ID查询操作日志 -->
+<select id="selectByUserId" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE user_id = #{userId}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 根据操作类型查询操作日志 -->
+<select id="selectByOperationType" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE operation_type = #{operationType}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 根据服务代码查询操作日志 -->
+<select id="selectByServiceCode" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE service_code = #{serviceCode}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 根据用户ID和操作类型查询操作日志 -->
+<select id="selectByUserIdAndOperationType" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE user_id = #{userId}
+    AND operation_type = #{operationType}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 根据时间范围查询操作日志 -->
+<select id="selectByDateRange" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE created_at BETWEEN #{startDate}
+    AND #{endDate}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 根据用户ID和时间范围查询操作日志 -->
+<select id="selectByUserIdAndDateRange" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE user_id = #{userId}
+    AND created_at BETWEEN #{startDate}
+    AND #{endDate}
+    ORDER BY created_at DESC
+</select>
+
+<!-- 分页查询操作日志，按时间倒序 -->
+<select id="selectWithPagination" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                ORDER BY created_at DESC
+                                LIMIT #{offset}, #{limit} </select>
+
+<!-- 根据用户ID分页查询操作日志，按时间倒序 -->
+<select id="selectByUserIdWithPagination" resultMap="UserOperationLogResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM user_operation_logs
+                                WHERE user_id = #{userId}
+    ORDER BY created_at DESC
+                                LIMIT #{offset}, #{limit} </select>
+
+<!-- 插入操作日志 -->
+<insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO user_operation_logs (
+                                    user_id, operation_type, service_code, operation_detail, ip_address, user_agent
+                                )
+                                VALUES (
+                                    #{userId}, #{operationType}, #{serviceCode}, #{operationDetail}, #{ipAddress}, #{userAgent}
+    )
+</insert>
+
+<!-- 批量插入操作日志 -->
+<insert id="batchInsert">
+    INSERT INTO user_operation_logs (
+                                    user_id, operation_type, service_code, operation_detail, ip_address, user_agent
+                                )
+                                VALUES
+    <foreach collection="logs" item="log" separator=",">
+        (#{
+        log.userId
+    }, #{
+        log.operationType
+    }, #{
+        log.serviceCode
+    }, #{
+        log.operationDetail
+    }, #{
+        log.ipAddress
+    }, #{
+        log.userAgent
+    })
+    </foreach>
+</insert>
+
+<!-- 根据ID删除操作日志 -->
+<delete id="deleteById">
+    DELETE FROM user_operation_logs
+                                WHERE id = #{id} </delete>
+
+<!-- 根据用户ID删除操作日志 -->
+<delete id="deleteByUserId">
+    DELETE FROM user_operation_logs
+                                WHERE user_id = #{userId} </delete>
+
+<!-- 删除指定日期之前的操作日志 -->
+<delete id="deleteBeforeDate">
+    DELETE FROM user_operation_logs
+                                WHERE created_at &lt; #{date} </delete>
+
+<!-- 统计操作日志总数 -->
+<select id="count" resultType="int">
+    SELECT COUNT(*)
+                                FROM user_operation_logs
+</select>
+
+<!-- 根据用户ID统计操作日志数量 -->
+<select id="countByUserId" resultType="int">
+    SELECT COUNT(*)
+                                FROM user_operation_logs
+                                WHERE user_id = #{userId} </select>
+
+<!-- 根据操作类型统计操作日志数量 -->
+<select id="countByOperationType" resultType="int">
+    SELECT COUNT(*)
+                                FROM user_operation_logs
+                                WHERE operation_type = #{operationType} </select>
+
+<!-- 根据时间范围统计操作日志数量 -->
+<select id="countByDateRange" resultType="int">
+    SELECT COUNT(*)
+                                FROM user_operation_logs
+                                WHERE created_at BETWEEN #{startDate}
+    AND #{endDate} </select></mapper>
